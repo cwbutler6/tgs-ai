@@ -24,7 +24,7 @@ interface Message {
       match_score: number
       match_reason: string
     }>
-    analytics?: Record<string, any>
+    analytics?: Record<string, unknown>
     temporal?: {
       newest_members?: Array<{
         'First Name': string
@@ -111,19 +111,19 @@ export function ChatInterface() {
           className="prose dark:prose-invert prose-sm"
           remarkPlugins={[remarkGfm]}
           components={{
-            a: ({ node, ...props }) => (
+            a: ({ ...props }) => (
               <a {...props} className="text-blue-500 hover:underline" />
             ),
-            code: ({ node, ...props }) => (
+            code: ({ ...props }) => (
               <code {...props} className="bg-muted-foreground/20 rounded px-1" />
             ),
-            ul: ({ node, ...props }) => (
+            ul: ({ ...props }) => (
               <ul {...props} className="list-disc pl-4 my-2" />
             ),
-            ol: ({ node, ...props }) => (
+            ol: ({ ...props }) => (
               <ol {...props} className="list-decimal pl-4 my-2" />
             ),
-            p: ({ node, children, ...props }) => {
+            p: ({ children, ...props }) => {
               const containsTable = React.Children.toArray(children).some(
                 child => React.isValidElement(child) && child.type === 'table'
               );
@@ -132,13 +132,13 @@ export function ChatInterface() {
               }
               return <p {...props} className="my-2">{children}</p>;
             },
-            table: ({ node, ...props }) => (
+            table: ({ ...props }) => (
               <table {...props} className="min-w-full my-4 border-collapse" />
             ),
-            th: ({ node, ...props }) => (
+            th: ({ ...props }) => (
               <th {...props} className="border border-muted-foreground/20 px-4 py-2 bg-muted" />
             ),
-            td: ({ node, ...props }) => (
+            td: ({ ...props }) => (
               <td {...props} className="border border-muted-foreground/20 px-4 py-2" />
             )
           }}
