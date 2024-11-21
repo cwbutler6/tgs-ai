@@ -48,19 +48,6 @@ export function MessageComponent({ message }: MessageProps) {
               {message.text}
             </ReactMarkdown>
           </Card>
-          
-          {message.data?.users && message.data.users.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-              {message.data.users.map((user, idx) => (
-                <Card key={idx} className="p-3 hover:shadow-md transition-shadow bg-card">
-                  <h4 className="font-medium text-sm">{user.name}</h4>
-                  <p className="text-xs text-muted-foreground">{user.title} at {user.company}</p>
-                  <p className="text-xs text-muted-foreground">{user.location}</p>
-                  <p className="text-xs mt-2 italic">{user.match_reason}</p>
-                </Card>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
