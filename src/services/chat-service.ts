@@ -1,4 +1,3 @@
-import { metadata } from '@/app/layout'
 import { ChatResponse, ConversationHistory } from '@/types/chat'
 
 export interface ChatContext {

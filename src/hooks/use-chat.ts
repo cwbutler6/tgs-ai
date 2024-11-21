@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Message, ConversationHistory } from '@/types/chat'
+import { Message } from '@/types/chat'
 import { ChatService, ChatContext } from '@/services/chat-service'
 import { useToast } from '@/hooks/use-toast'
 
@@ -91,6 +91,14 @@ export function useChat(options: UseChatOptions = {}) {
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Error sending message:', error)
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: '',
+        sender: 'assistant',
+        timestamp: new Date(),
+        error: 'Failed to send message. Please try again.'
+      }
+      setMessages(prev => [...prev, errorMessage])
       toast({
         title: 'Error',
         description: 'Failed to send message. Please try again.',
@@ -98,6 +106,61 @@ export function useChat(options: UseChatOptions = {}) {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const retryMessage = async (messageId: string) => {
+    const messageIndex = messages.findIndex(m => m.id === messageId)
+    if (messageIndex === -1) return
+
+    // Get the user message that we want to retry
+    const userMessage = messages[messageIndex - 1]
+    if (!userMessage || userMessage.sender !== 'user') return
+
+    // Update the error message to show retrying state
+    setMessages(prev => prev.map(m => 
+      m.id === messageId ? { ...m, retrying: true } : m
+    ))
+
+    try {
+      const response = await ChatService.sendMessage(
+        userMessage.text,
+        sessionId.current,
+        context.current
+      )
+
+      // Replace the error message with the new response
+      const assistantMessage: Message = {
+        id: messageId,
+        text: response.text,
+        sender: 'assistant',
+        timestamp: new Date(),
+        data: response.data,
+        correlationId: response.correlationId
+      }
+
+      setMessages(prev => prev.map(m => 
+        m.id === messageId ? assistantMessage : m
+      ))
+
+      // Update conversation history
+      if (context.current.conversation_history) {
+        context.current.conversation_history[messageIndex] = {
+          role: 'assistant',
+          content: response.text,
+          timestamp: assistantMessage.timestamp.toISOString()
+        }
+      }
+    } catch (error) {
+      console.error('Error retrying message:', error)
+      setMessages(prev => prev.map(m => 
+        m.id === messageId ? { ...m, error: 'Failed to send message. Please try again.', retrying: false } : m
+      ))
+      toast({
+        title: 'Error',
+        description: 'Failed to retry message. Please try again.',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -123,6 +186,7 @@ export function useChat(options: UseChatOptions = {}) {
     messages,
     isLoading,
     sendMessage,
+    retryMessage,
     clearChat,
     sessionId: sessionId.current
   }

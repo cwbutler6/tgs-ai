@@ -29,6 +29,7 @@ export interface Message {
   data?: any
   error?: string
   correlationId?: string
+  retrying?: boolean
 }
 
 export interface ChatResponse {

@@ -8,11 +8,17 @@ import remarkGfm from 'remark-gfm'
 
 interface ChatMessageProps {
   message: Message
-  onRetry: () => void
+  onRetry?: (messageId: string) => void
 }
 
 export function ChatMessage({ message, onRetry }: ChatMessageProps) {
   const isAssistant = message.sender === 'assistant'
+
+  const handleRetry = () => {
+    if (onRetry && message.id) {
+      onRetry(message.id)
+    }
+  }
 
   return (
     <div className={`flex gap-3 ${isAssistant ? 'flex-row' : 'flex-row-reverse'}`}>
@@ -25,16 +31,16 @@ export function ChatMessage({ message, onRetry }: ChatMessageProps) {
         <Card className={`px-4 py-3 ${isAssistant ? 'bg-secondary' : 'bg-primary text-primary-foreground'}`}>
           {message.error ? (
             <div className="flex flex-col gap-2">
-              <p className="text-destructive">Error sending message</p>
+              <p className="text-destructive">{message.error}</p>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={onRetry}
+                onClick={handleRetry}
                 disabled={message.retrying}
                 className="flex gap-2"
               >
                 <RefreshCw className={`h-4 w-4 ${message.retrying ? 'animate-spin' : ''}`} />
-                Retry
+                {message.retrying ? 'Retrying...' : 'Retry'}
               </Button>
             </div>
           ) : (
@@ -49,4 +55,4 @@ export function ChatMessage({ message, onRetry }: ChatMessageProps) {
       </div>
     </div>
   )
-} 
+}
