@@ -25,7 +25,7 @@ export class ChatService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          query,
+          message: query,
           session_id: sessionId,
           user_id: context.user_id,
           metadata: context.metadata || {},
