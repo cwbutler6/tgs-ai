@@ -26,13 +26,21 @@ export interface Message {
   text: string
   sender: 'user' | 'assistant'
   timestamp: Date
-  data?: MessageData
-  error?: boolean
-  retrying?: boolean
+  data?: any
+  error?: string
+  correlationId?: string
 }
 
 export interface ChatResponse {
   text: string
   status: 'success' | 'error'
-  data?: MessageData
-} 
+  error?: string
+  correlationId?: string
+  data?: any
+}
+
+export interface ConversationHistory {
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: string
+}
