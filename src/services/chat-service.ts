@@ -30,11 +30,10 @@ export class ChatService {
       const data = await response.json()
       
       return {
-        text: data.response,
-        status: data.status,
+        text: data.text,
+        status: data.success ? 'success' : 'error',
         data: {
-          intent: data.intent,
-          conversation_id: data.conversation_id
+          ...data.data
         }
       }
 
