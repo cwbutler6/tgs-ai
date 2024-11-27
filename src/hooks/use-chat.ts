@@ -8,36 +8,59 @@ interface UseChatOptions {
   initialContext?: ChatContext
 }
 
+const generateUserId = () => {
+  if (typeof window === 'undefined') return ''
+  
+  const savedUserId = localStorage.getItem('chatUserId')
+  if (savedUserId) return savedUserId
+  
+  const newUserId = `user-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  localStorage.setItem('chatUserId', newUserId)
+  return newUserId
+}
+
 export function useChat(options: UseChatOptions = {}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const sessionId = useRef(`frontend-${Date.now()}`)
-  const context = useRef<ChatContext>(options.initialContext || {})
+  const userId = useRef(generateUserId())
 
   // Load messages from localStorage if persistence is enabled
   useEffect(() => {
-    if (options.persistMessages) {
-      const savedMessages = localStorage.getItem('chatMessages')
-      if (savedMessages) {
-        const parsedMessages = JSON.parse(savedMessages).map((msg: Message) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }))
-        setMessages(parsedMessages)
-        
-        // Update conversation history in context
-        context.current.conversation_history = parsedMessages.map((msg: Message) => ({
-          role: msg.sender,
-          content: msg.text,
-          timestamp: msg.timestamp.toISOString()
-        }))
+    if (typeof window === 'undefined') return
+
+    const loadMessages = async () => {
+      if (options.persistMessages) {
+        try {
+          const history = await ChatService.getConversationHistory(userId.current)
+          if (history && history.length > 0) {
+            const messages = history.map((msg): Message => ({
+              id: Date.now().toString() + Math.random(),
+              text: msg.content,
+              sender: msg.role,
+              timestamp: new Date(msg.timestamp)
+            }))
+            setMessages(messages)
+          }
+        } catch (error) {
+          console.error('Error loading messages:', error)
+          const savedMessages = localStorage.getItem('chatMessages')
+          if (savedMessages) {
+            const parsedMessages = JSON.parse(savedMessages).map((msg: Message) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp)
+            }))
+            setMessages(parsedMessages)
+          }
+        }
       }
     }
+    loadMessages()
   }, [options.persistMessages])
 
   // Save messages to localStorage when they change
   useEffect(() => {
+    if (typeof window === 'undefined') return
     if (options.persistMessages) {
       localStorage.setItem('chatMessages', JSON.stringify(messages))
     }
@@ -55,20 +78,9 @@ export function useChat(options: UseChatOptions = {}) {
     setIsLoading(true)
 
     try {
-      // Update conversation history in context
-      context.current.conversation_history = [
-        ...(context.current.conversation_history || []),
-        {
-          role: 'user',
-          content: text,
-          timestamp: userMessage.timestamp.toISOString()
-        }
-      ]
-
       const response = await ChatService.sendMessage(
-        text, 
-        sessionId.current,
-        context.current
+        text,
+        userId.current
       )
       
       const assistantMessage: Message = {
@@ -76,109 +88,38 @@ export function useChat(options: UseChatOptions = {}) {
         text: response.text,
         sender: 'assistant',
         timestamp: new Date(),
-        data: response.data,
-        error: response.error,
-        correlationId: response.correlationId
+        data: response.data
       }
-
-      // Update conversation history with assistant's response
-      context.current.conversation_history?.push({
-        role: 'assistant',
-        content: response.text,
-        timestamp: assistantMessage.timestamp.toISOString()
-      })
 
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Error sending message:', error)
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: '',
-        sender: 'assistant',
-        timestamp: new Date(),
-        error: 'Failed to send message. Please try again.'
-      }
-      setMessages(prev => [...prev, errorMessage])
       toast({
         title: 'Error',
         description: 'Failed to send message. Please try again.',
         variant: 'destructive'
       })
+      // Remove the failed message
+      setMessages(prev => prev.slice(0, -1))
     } finally {
       setIsLoading(false)
     }
   }
 
-  const retryMessage = async (messageId: string) => {
-    const messageIndex = messages.findIndex(m => m.id === messageId)
-    if (messageIndex === -1) return
-
-    // Get the user message that we want to retry
-    const userMessage = messages[messageIndex - 1]
-    if (!userMessage || userMessage.sender !== 'user') return
-
-    // Update the error message to show retrying state
-    setMessages(prev => prev.map(m => 
-      m.id === messageId ? { ...m, retrying: true } : m
-    ))
-
-    try {
-      const response = await ChatService.sendMessage(
-        userMessage.text,
-        sessionId.current,
-        context.current
-      )
-
-      // Replace the error message with the new response
-      const assistantMessage: Message = {
-        id: messageId,
-        text: response.text,
-        sender: 'assistant',
-        timestamp: new Date(),
-        data: response.data,
-        correlationId: response.correlationId
-      }
-
-      setMessages(prev => prev.map(m => 
-        m.id === messageId ? assistantMessage : m
-      ))
-
-      // Update conversation history
-      if (context.current.conversation_history) {
-        context.current.conversation_history[messageIndex] = {
-          role: 'assistant',
-          content: response.text,
-          timestamp: assistantMessage.timestamp.toISOString()
-        }
-      }
-    } catch (error) {
-      console.error('Error retrying message:', error)
-      setMessages(prev => prev.map(m => 
-        m.id === messageId ? { ...m, error: 'Failed to send message. Please try again.', retrying: false } : m
-      ))
-      toast({
-        title: 'Error',
-        description: 'Failed to retry message. Please try again.',
-        variant: 'destructive'
-      })
-    }
+  const retryMessage = async (messageId: string): Promise<void> => {
+    const messageToRetry = messages.find(m => m.id === messageId)
+    if (!messageToRetry) return
+    
+    // Remove the failed message and its response
+    setMessages(prev => prev.slice(0, -2))
+    // Retry sending the message
+    await sendMessage(messageToRetry.text)
   }
 
-  const clearChat = async () => {
-    try {
-      await ChatService.clearSession(sessionId.current)
-      setMessages([])
-      context.current.conversation_history = []
-      if (options.persistMessages) {
-        localStorage.removeItem('chatMessages')
-      }
-    } catch (error) {
-      console.error('Error clearing chat:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to clear chat. Please try again.',
-        variant: 'destructive'
-      })
+  const clearChat = () => {
+    setMessages([])
+    if (options.persistMessages) {
+      localStorage.removeItem('chatMessages')
     }
   }
 
@@ -188,6 +129,6 @@ export function useChat(options: UseChatOptions = {}) {
     sendMessage,
     retryMessage,
     clearChat,
-    sessionId: sessionId.current
+    userId: userId.current
   }
 }

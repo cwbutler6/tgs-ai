@@ -26,7 +26,16 @@ export interface Message {
   text: string
   sender: 'user' | 'assistant'
   timestamp: Date
-  data?: any
+  data?: {
+    intent?: {
+      intent_type: string
+      confidence: number
+      entities: string[]
+      action_required: boolean
+      priority: 'high' | 'medium' | 'low'
+    }
+    conversation_id?: string
+  }
   error?: string
   correlationId?: string
   retrying?: boolean
@@ -37,7 +46,17 @@ export interface ChatResponse {
   status: 'success' | 'error'
   error?: string
   correlationId?: string
-  data?: any
+  data?: {
+    intent?: {
+      intent_type: string
+      confidence: number
+      entities: string[]
+      action_required: boolean
+      priority: 'high' | 'medium' | 'low'
+    }
+    conversation_id?: string
+  }
+  isStreaming?: boolean
 }
 
 export interface ConversationHistory {

@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { ChatMessage } from './chat-message'
 import { ChatInput } from './chat-input'
+import { LoadingMessage } from './loading-message'
 import { useChat } from '@/hooks/use-chat'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
@@ -17,7 +18,7 @@ export function ChatContainer() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, isLoading])
 
   return (
     <div className="flex flex-col h-full">
@@ -27,9 +28,10 @@ export function ChatContainer() {
             <ChatMessage 
               key={message.id} 
               message={message} 
-              onRetry={retryMessage}
+              retryMessage={retryMessage}
             />
           ))}
+          {isLoading && <LoadingMessage />}
           <div ref={messagesEndRef} />
         </div>
       </div>

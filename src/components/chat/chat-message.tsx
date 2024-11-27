@@ -8,15 +8,17 @@ import remarkGfm from 'remark-gfm'
 
 interface ChatMessageProps {
   message: Message
-  onRetry?: (messageId: string) => void
+  onRetry?: (messageId: string) => Promise<void> | void
+  isLoading?: boolean
+  retryMessage?: (messageId: string) => Promise<void> | void
 }
 
-export function ChatMessage({ message, onRetry }: ChatMessageProps) {
+export function ChatMessage({ message, isLoading, retryMessage }: ChatMessageProps) {
   const isAssistant = message.sender === 'assistant'
 
   const handleRetry = () => {
-    if (onRetry && message.id) {
-      onRetry(message.id)
+    if (retryMessage && message.id) {
+      retryMessage(message.id)
     }
   }
 
@@ -42,6 +44,15 @@ export function ChatMessage({ message, onRetry }: ChatMessageProps) {
                 <RefreshCw className={`h-4 w-4 ${message.retrying ? 'animate-spin' : ''}`} />
                 {message.retrying ? 'Retrying...' : 'Retry'}
               </Button>
+            </div>
+          ) : isLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="flex space-x-2">
+                <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.3s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400"></div>
+              </div>
+              <span className="text-sm text-muted-foreground">AI is thinking...</span>
             </div>
           ) : (
             <ReactMarkdown 
