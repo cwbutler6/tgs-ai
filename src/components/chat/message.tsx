@@ -1,8 +1,8 @@
 import { Message } from '@/types/chat'
 import { Avatar } from '@/components/ui/avatar'
-import { Card } from '@/components/ui/card'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import cn from 'classnames'
 
 interface MessageProps {
   message: Message
@@ -11,45 +11,22 @@ interface MessageProps {
 
 export function MessageComponent({ message }: MessageProps) {
   const isAssistant = message.sender === 'assistant'
-  
+
   return (
-    <div className={`flex gap-3 ${isAssistant ? '' : 'justify-end'} animate-in fade-in-0 slide-in-from-bottom-3`}>
-      <div className={`flex gap-2 max-w-[80%] ${isAssistant ? 'order-1' : 'order-2'}`}>
-        <Avatar className="h-8 w-8 mt-1">
-          <div className="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground">
-            {isAssistant ? 'AI' : 'U'}
-          </div>
-        </Avatar>
-        
-        <div className="flex flex-col gap-1">
-          <Card className={`px-4 py-3 ${
-            isAssistant ? 'bg-secondary' : 'bg-primary text-primary-foreground'
-          }`}>
-            <ReactMarkdown 
-              className="prose dark:prose-invert prose-sm"
-              remarkPlugins={[remarkGfm]}
-              components={{
-                a: ({ ...props }) => (
-                  <a {...props} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" />
-                ),
-                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
-                code: ({ className, children }) => {
-                  const isInline = !className
-                  return isInline ? 
-                    <code className="bg-muted px-1 py-0.5 rounded text-sm">{children}</code> :
-                    <pre className="bg-muted p-3 rounded-lg overflow-x-auto">
-                      <code className="text-sm">{children}</code>
-                    </pre>
-                }
-              }}
-            >
-              {message.text}
-            </ReactMarkdown>
-          </Card>
+    <div className="flex gap-3 items-start max-w-2xl">
+      <Avatar />
+      <div className={cn(
+        "rounded-xl border px-4 py-3",
+        isAssistant
+          ? "border-neutral-200 bg-white text-neutral-950 shadow-[0_1px_7px_0_rgba(0,0,0,0.03)] dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+          : "border-neutral-200 bg-secondary text-neutral-950 dark:border-neutral-800 dark:bg-secondary dark:text-neutral-50"
+      )}>
+        <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none">
+          <ReactMarkdown>
+            {message.text}
+          </ReactMarkdown>
         </div>
       </div>
     </div>
   )
-} 
+}
