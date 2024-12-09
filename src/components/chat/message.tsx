@@ -22,7 +22,7 @@ export function MessageComponent({ message }: MessageProps) {
           : "border-neutral-200 bg-secondary text-neutral-950 dark:border-neutral-800 dark:bg-secondary dark:text-neutral-50"
       )}>
         <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none">
-          <ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {message.text}
           </ReactMarkdown>
         </div>
