@@ -69,8 +69,8 @@ export async function searchMembers(query: string): Promise<SearchResponse> {
 
     // Convert results to SearchResult type
     const dbResults = await cursor.toArray();
-    const searchResults: SearchResult[] = dbResults.map(doc => ({
-      id: doc.id || '',
+    const searchResults: SearchResult[] = dbResults.map((doc, index) => ({
+      id: doc.id || `generated-${index}-${Date.now()}`,
       firstName: doc.firstName || '',
       lastName: doc.lastName || '',
       email: doc.email || '',

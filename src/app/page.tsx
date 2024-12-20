@@ -50,46 +50,46 @@ export default async function Home({ searchParams }: PageProps) {
             
             <div className="grid gap-4">
               {searchState.results.map((result) => (
-                <Card key={result.id}>
+                <Card key={`member-${result.id}`}>
                   <CardHeader>
                     <CardTitle>{result.firstName} {result.lastName}</CardTitle>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 space-y-1">
                       {result.profile?.title && (
-                        <p key="title">{result.profile.title}</p>
+                        <p key={`title-${result.id}`}>{result.profile.title}</p>
                       )}
                       {result.profile?.company && (
-                        <p key="company">{result.profile.company}</p>
+                        <p key={`company-${result.id}`}>{result.profile.company}</p>
                       )}
                       {result.profile?.location && (
-                        <p key="location">{result.profile.location}</p>
+                        <p key={`location-${result.id}`}>{result.profile.location}</p>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent>
                     {result.matchReason && (
-                      <div className="mb-4 p-3 bg-muted rounded-md">
+                      <div key={`match-${result.id}`} className="mb-4 p-3 bg-muted rounded-md">
                         <p className="text-sm text-muted-foreground">{result.matchReason}</p>
                       </div>
                     )}
                     
                     {result.metadata?.connectionsFormData?.services && (
-                      <div key="services" className="mb-4">
+                      <div key={`services-${result.id}`} className="mb-4">
                         <p className="font-semibold text-sm mb-1">Services Offered:</p>
                         <p className="text-sm text-gray-600">{result.metadata.connectionsFormData.services}</p>
                       </div>
                     )}
                     
                     {result.metadata?.connectionsFormData?.interests && (
-                      <div key="interests" className="space-y-2">
+                      <div key={`interests-${result.id}`} className="space-y-2">
                         {result?.metadata?.connectionsFormData?.interests?.business?.filter?.(Boolean).filter(i => i !== '&')?.length || 0 > 0 && (
-                          <div key="business-interests">
+                          <div key={`business-interests-${result.id}`}>
                             <p className="text-sm font-semibold">Professional Interests:</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {result?.metadata?.connectionsFormData?.interests?.business?.filter(Boolean)
                                 .filter(i => i !== '&')
                                 .map((interest, index) => (
                                   <Badge 
-                                    key={`business-${interest}-${index}`} 
+                                    key={`business-${result.id}-${interest}-${index}`} 
                                     variant="secondary"
                                   >
                                     {interest}
@@ -100,14 +100,14 @@ export default async function Home({ searchParams }: PageProps) {
                         )}
                         
                         {result?.metadata?.connectionsFormData?.interests?.social?.filter(Boolean).filter(i => i !== '&').length || 0 > 0 && (
-                          <div key="social-interests">
+                          <div key={`social-interests-${result.id}`}>
                             <p className="text-sm font-semibold">Social Interests:</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {result?.metadata?.connectionsFormData?.interests?.social?.filter(Boolean)
                                 .filter(i => i !== '&')
                                 .map((interest, index) => (
                                   <Badge 
-                                    key={`social-${interest}-${index}`} 
+                                    key={`social-${result.id}-${interest}-${index}`} 
                                     variant="secondary"
                                   >
                                     {interest}
@@ -120,44 +120,44 @@ export default async function Home({ searchParams }: PageProps) {
                     )}
                     
                     {result.metadata?.connectionsFormData?.mentorship && (
-                      <div key="mentorship" className="mt-4">
+                      <div key={`mentorship-${result.id}`} className="mt-4">
                         <p className="text-sm font-semibold">Mentorship:</p>
                         {result.metadata.connectionsFormData.mentorship.mentorshipInfo && (
-                          <p key="mentorship-info" className="text-sm text-gray-600 mt-1">
+                          <p key={`mentorship-info-${result.id}`} className="text-sm text-gray-600 mt-1">
                             {result.metadata.connectionsFormData.mentorship.mentorshipInfo}
                           </p>
                         )}
                         <div className="flex gap-2 mt-2">
                           {result.metadata.connectionsFormData.mentorship.wantsToBeMentor && (
-                            <Badge key="mentor">Mentor</Badge>
+                            <Badge key={`mentor-${result.id}`} variant="secondary">Mentor</Badge>
                           )}
                           {result.metadata.connectionsFormData.mentorship.wantsToBeMentee && (
-                            <Badge key="mentee">Mentee</Badge>
+                            <Badge key={`mentee-${result.id}`} variant="secondary">Mentee</Badge>
                           )}
                         </div>
                       </div>
                     )}
                     
                     {result.metadata?.salesforceData?.whyJoin && (
-                      <div key="why-join" className="mt-4">
+                      <div key={`why-join-${result.id}`} className="mt-4">
                         <p className="text-sm font-semibold">Why I Joined TGS:</p>
                         <p className="text-sm text-gray-600 mt-1">{result.metadata.salesforceData.whyJoin}</p>
                       </div>
                     )}
 
                     {result.metadata?.peopleVineData && (
-                      <div key="peoplevine" className="mt-4 text-sm text-gray-500">
+                      <div key={`peoplevine-${result.id}`} className="mt-4 text-sm text-gray-500">
                         {result.metadata.peopleVineData.serviceTitle && (
-                          <p>Service: {result.metadata.peopleVineData.serviceTitle}</p>
+                          <p key={`service-${result.id}`}>Service: {result.metadata.peopleVineData.serviceTitle}</p>
                         )}
                         {result.metadata.peopleVineData.companyTitle && (
-                          <p>Role: {result.metadata.peopleVineData.companyTitle}</p>
+                          <p key={`role-${result.id}`}>Role: {result.metadata.peopleVineData.companyTitle}</p>
                         )}
                         {result.metadata.peopleVineData.companyName && (
-                          <p>Company: {result.metadata.peopleVineData.companyName}</p>
+                          <p key={`company-name-${result.id}`}>Company: {result.metadata.peopleVineData.companyName}</p>
                         )}
                         {result.metadata.peopleVineData.city && (
-                          <p>Location: {result.metadata.peopleVineData.city}</p>
+                          <p key={`city-${result.id}`}>Location: {result.metadata.peopleVineData.city}</p>
                         )}
                       </div>
                     )}
