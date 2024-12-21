@@ -31,6 +31,7 @@ async function findDataByEmail(email, data) {
     data.find(
       (row) =>
         (row.email?.toLowerCase() === email.toLowerCase()) ||
+        (row['Email']?.toLowerCase() === email.toLowerCase()) ||
         (row['Customer Email']?.toLowerCase() === email.toLowerCase()) ||
         (row['Email Address']?.toLowerCase() === email.toLowerCase())
     ) || null

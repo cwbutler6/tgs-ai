@@ -81,38 +81,34 @@ export default async function Home({ searchParams }: PageProps) {
                     
                     {result.metadata?.connectionsFormData?.interests && (
                       <div key={`interests-${result.id}`} className="space-y-2">
-                        {result?.metadata?.connectionsFormData?.interests?.business?.filter?.(Boolean).filter(i => i !== '&')?.length || 0 > 0 && (
+                        {result.metadata.connectionsFormData.interests.business && result.metadata.connectionsFormData.interests.business.length > 0 && (
                           <div key={`business-interests-${result.id}`}>
                             <p className="text-sm font-semibold">Professional Interests:</p>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {result?.metadata?.connectionsFormData?.interests?.business?.filter(Boolean)
-                                .filter(i => i !== '&')
-                                .map((interest, index) => (
-                                  <Badge 
-                                    key={`business-${result.id}-${interest}-${index}`} 
-                                    variant="secondary"
-                                  >
-                                    {interest}
-                                  </Badge>
-                                ))}
+                              {result.metadata.connectionsFormData.interests.business.map((interest, index) => (
+                                <Badge 
+                                  key={`business-${result.id}-${interest}-${index}`} 
+                                  variant="secondary"
+                                >
+                                  {interest}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
                         )}
                         
-                        {result?.metadata?.connectionsFormData?.interests?.social?.filter(Boolean).filter(i => i !== '&').length || 0 > 0 && (
+                        {result.metadata.connectionsFormData.interests.social && result.metadata.connectionsFormData.interests.social.length > 0 && (
                           <div key={`social-interests-${result.id}`}>
                             <p className="text-sm font-semibold">Social Interests:</p>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {result?.metadata?.connectionsFormData?.interests?.social?.filter(Boolean)
-                                .filter(i => i !== '&')
-                                .map((interest, index) => (
-                                  <Badge 
-                                    key={`social-${result.id}-${interest}-${index}`} 
-                                    variant="secondary"
-                                  >
-                                    {interest}
-                                  </Badge>
-                                ))}
+                              {result.metadata.connectionsFormData.interests.social.map((interest, index) => (
+                                <Badge 
+                                  key={`social-${result.id}-${interest}-${index}`} 
+                                  variant="secondary"
+                                >
+                                  {interest}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
                         )}
